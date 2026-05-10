@@ -460,6 +460,16 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+
+                <hr className="divider" />
+
+                <div className="section-group">
+                  <h3>7. 書体設定</h3>
+                  <div className="template-grid">
+                    <button className={`template-btn ${cardData.fontMode === 'gothic' ? 'active' : ''}`} onClick={() => setCardData(p => ({...p, fontMode: 'gothic'}))}>ゴシック体</button>
+                    <button className={`template-btn ${cardData.fontMode === 'mincho' ? 'active' : ''}`} onClick={() => setCardData(p => ({...p, fontMode: 'mincho'}))}>明朝体</button>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="animate-in">
@@ -496,14 +506,6 @@ export default function App() {
                   <div className="checkbox-group">
                     <input type="checkbox" id="showBackBg" checked={cardData.showBackBg} onChange={(e) => setCardData(p => ({...p, showBackBg: e.target.checked}))} />
                     <label htmlFor="showBackBg">背景にブランドカラーを塗る</label>
-                  </div>
-                </div>
-                <hr className="divider" />
-                <div className="section-group">
-                  <h3>5. フォント設定</h3>
-                  <div className="template-grid">
-                    <button className={`template-btn ${cardData.fontMode === 'gothic' ? 'active' : ''}`} onClick={() => setCardData(p => ({...p, fontMode: 'gothic'}))}>ゴシック体</button>
-                    <button className={`template-btn ${cardData.fontMode === 'mincho' ? 'active' : ''}`} onClick={() => setCardData(p => ({...p, fontMode: 'mincho'}))}>明朝体</button>
                   </div>
                 </div>
               </div>
