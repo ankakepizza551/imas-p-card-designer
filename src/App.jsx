@@ -234,7 +234,7 @@ export default function App() {
           (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
         const options = {
           pixelRatio: isMobile ? 2 : 3,
-          cacheBust: true,
+          cacheBust: false,
           style: { transform: 'none' },
           fontEmbedCSS: '',
         };
@@ -274,8 +274,8 @@ export default function App() {
     } catch (err) {
       if (winF) winF.close();
       if (winB) winB.close();
-      alert(`保存に失敗しました: ${err.message}`);
-      console.error(err);
+      console.error('PNG export error:', err);
+      alert(`保存に失敗しました\n${err?.message || err}\n\nブラウザのコンソール (F12) に詳細が出ています。`);
     } finally {
       setIsExporting(false);
     }
@@ -290,7 +290,7 @@ export default function App() {
       await withBothSidesVisible(async () => {
         const options = {
           pixelRatio: 2,
-          cacheBust: true,
+          cacheBust: false,
           style: { transform: 'none' },
           fontEmbedCSS: '',
         };
@@ -409,9 +409,14 @@ export default function App() {
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                       <SortableContext items={cardData.selectedIdols.map(i => i.id)} strategy={verticalListSortingStrategy}>
                         {cardData.selectedIdols.map(idol => (
-                          <SortableIdolTag key={idol.id} idol={idol} 
-                            onRemove={() => setCardData(p => ({ ...p, selectedIdols: p.selectedIdols.filter(i => i.id !== idol.id) }))} 
-                            onImageUpload={handleIdolImageUpload} />
+                          <SortableIdolTag key={idol.id} idol={idol}
+                            onRemove={() => setCardData(p => ({ ...p, selectedIdols: p.selectedIdols.filter(i => i.id !== idol.id) }))}
+                            onImageUpload={handleIdolImageUpload}
+                            onImageAdjust={(idolId, adj) => setCardData(p => ({
+                              ...p,
+                              selectedIdols: p.selectedIdols.map(i => i.id === idolId ? { ...i, ...adj } : i)
+                            }))}
+                          />
                         ))}
                       </SortableContext>
                     </DndContext>
@@ -449,32 +454,34 @@ export default function App() {
                     </div>
                   )}
 
-                  <div className="img-adjust-controls">
-                    <div className="img-adjust-header">
-                      <span>画像調整</span>
-                      <button className="reset-adjust-btn" onClick={() => setCardData(p => ({...p, imageScale: 1.0, imageOffsetX: 0, imageOffsetY: 0}))}>リセット</button>
-                    </div>
-                    <div className="form-group">
-                      <label>サイズ: {Math.round(cardData.imageScale * 100)}%</label>
-                      <input type="range" min="40" max="200" value={Math.round(cardData.imageScale * 100)}
-                        onChange={e => setCardData(p => ({...p, imageScale: e.target.value / 100}))}
-                        className="range-input" />
-                    </div>
-                    <div className="form-grid">
-                      <div className="form-group">
-                        <label>横位置: {cardData.imageOffsetX > 0 ? '+' : ''}{cardData.imageOffsetX}%</label>
-                        <input type="range" min="-50" max="50" value={cardData.imageOffsetX}
-                          onChange={e => setCardData(p => ({...p, imageOffsetX: Number(e.target.value)}))}
-                          className="range-input" />
+                  {cardData.imageMode === 'group' && cardData.groupImage && (
+                    <div className="img-adjust-controls">
+                      <div className="img-adjust-header">
+                        <span>画像調整</span>
+                        <button className="reset-adjust-btn" onClick={() => setCardData(p => ({...p, imageScale: 1.0, imageOffsetX: 0, imageOffsetY: 0}))}>リセット</button>
                       </div>
                       <div className="form-group">
-                        <label>縦位置: {cardData.imageOffsetY > 0 ? '+' : ''}{cardData.imageOffsetY}%</label>
-                        <input type="range" min="-30" max="30" value={cardData.imageOffsetY}
-                          onChange={e => setCardData(p => ({...p, imageOffsetY: Number(e.target.value)}))}
+                        <label>サイズ: {Math.round(cardData.imageScale * 100)}%</label>
+                        <input type="range" min="40" max="200" value={Math.round(cardData.imageScale * 100)}
+                          onChange={e => setCardData(p => ({...p, imageScale: e.target.value / 100}))}
                           className="range-input" />
                       </div>
+                      <div className="form-grid">
+                        <div className="form-group">
+                          <label>横位置: {cardData.imageOffsetX > 0 ? '+' : ''}{cardData.imageOffsetX}%</label>
+                          <input type="range" min="-50" max="50" value={cardData.imageOffsetX}
+                            onChange={e => setCardData(p => ({...p, imageOffsetX: Number(e.target.value)}))}
+                            className="range-input" />
+                        </div>
+                        <div className="form-group">
+                          <label>縦位置: {cardData.imageOffsetY > 0 ? '+' : ''}{cardData.imageOffsetY}%</label>
+                          <input type="range" min="-30" max="30" value={cardData.imageOffsetY}
+                            onChange={e => setCardData(p => ({...p, imageOffsetY: Number(e.target.value)}))}
+                            className="range-input" />
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <hr className="divider" />
@@ -659,12 +666,13 @@ export default function App() {
               <div ref={cardRefFront} className={`card-mockup template-${cardData.templateId} font-${cardData.fontMode}`} style={{ '--theme-gradient': themeGradient, '--brand-color': selectedBrand.color, display: activeSide === 'front' ? 'block' : 'none' }}>
                 <div className="card-inner">
                   {cardData.imageMode === 'individual' ? (
-                    <div className="idol-images-layer" style={{
-                      transform: `scale(${cardData.imageScale}) translate(${cardData.imageOffsetX}%, ${cardData.imageOffsetY}%)`,
-                      transformOrigin: 'bottom right',
-                    }}>
+                    <div className="idol-images-layer">
                       {cardData.selectedIdols.map((idol, idx) => idol.image && (
-                        <img key={idol.id} src={idol.image} className="idol-image-auto animate-in" style={{ '--index': idx }} />
+                        <img key={idol.id} src={idol.image} className="idol-image-auto animate-in" style={{
+                          '--index': idx,
+                          transform: `scale(${idol.imgScale ?? 1}) translate(${idol.imgOffsetX ?? 0}%, ${idol.imgOffsetY ?? 0}%)`,
+                          transformOrigin: 'bottom right',
+                        }} />
                       ))}
                     </div>
                   ) : (

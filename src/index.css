@@ -163,11 +163,23 @@ select.form-input { appearance: auto; cursor: pointer; }
 .brand-logo-large { font-size: 2.5rem; font-weight: 900; letter-spacing: 0.05em; text-shadow: 0 2px 10px rgba(0,0,0,0.1); word-break: break-all; line-height: 1.1; }
 .brand-logo-large:has(span) { font-size: 1.5rem; } /* スラッシュ区切りで長くなった場合用 */
 
-.idol-tag { background: #fff; padding: 0.8rem 1rem; border-radius: 16px; display: flex; align-items: center; gap: 1rem; border: 1px solid #e2e8f0; margin-bottom: 0.8rem; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+.idol-tag { background: #fff; padding: 0.8rem 1rem; border-radius: 16px; display: flex; flex-direction: column; gap: 0.6rem; border: 1px solid #e2e8f0; margin-bottom: 0.8rem; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+.idol-tag-row { display: flex; align-items: center; gap: 1rem; }
+.tag-actions { display: flex; gap: 4px; }
 .tag-name { flex: 1; font-weight: 800; font-size: 0.95rem; color: #1a202c; }
 .tag-icon-btn { background: #f7fafc; border: 1px solid #edf2f7; width: 32px; height: 32px; border-radius: 10px; color: #4a5568; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: 0.2s; }
 .tag-icon-btn:hover { background: #2681c8; color: #fff; border-color: #2681c8; }
+.tag-icon-btn.active { background: #2681c8; color: #fff; border-color: #2681c8; }
 .tag-icon-btn.remove:hover { background: #e53e3e; color: #fff; border-color: #e53e3e; }
+
+/* PER-IDOL IMAGE ADJUSTMENT */
+.idol-img-adjust { padding: 0.8rem; background: #f7fafc; border-radius: 12px; border: 1px solid #edf2f7; display: flex; flex-direction: column; gap: 0.5rem; }
+.adjust-row { display: flex; align-items: center; gap: 0.8rem; }
+.adjust-row label { font-size: 0.7rem; font-weight: 700; color: #718096; min-width: 80px; flex-shrink: 0; margin: 0; }
+.adjust-row .range-input { margin-top: 0; flex: 1; }
+.idol-img-adjust .reset-adjust-btn { align-self: flex-end; margin-top: 0.2rem; }
+.drag-handle { cursor: grab; color: #cbd5e0; font-size: 1rem; user-select: none; touch-action: none; }
+.drag-handle:active { cursor: grabbing; }
 
 .instruction-text { margin-top: 1.5rem; font-size: 0.7rem; color: #a0aec0; text-align: center; line-height: 1.6; font-weight: 600; }
 
