@@ -140,6 +140,7 @@ select.form-input { appearance: auto; cursor: pointer; }
 .qr-container small { font-size: 0.55rem; font-weight: 900; letter-spacing: 0.1em; opacity: 0.8; }
 .back-footer { position: absolute; bottom: 0.8rem; width: 100%; text-align: center; font-size: 0.5rem; opacity: 0.4; font-weight: 700; }
 
+.search-container { position: relative; }
 .idol-picker-dropdown { position: absolute; top: 100%; left: 0; right: 0; z-index: 200; margin-top: 8px; padding: 1.5rem; max-height: 450px; overflow-y: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; box-shadow: 0 25px 70px rgba(0,0,0,0.15); }
 .unit-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.2rem; }
 .unit-tab-btn { padding: 0.45rem 1rem; border-radius: 20px; border: 1px solid #e2e8f0; background: #f7fafc; color: #718096; cursor: pointer; font-size: 0.7rem; font-weight: 800; transition: 0.2s; }
