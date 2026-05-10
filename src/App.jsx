@@ -377,12 +377,12 @@ export default function App() {
                   </div>
                 )}
                 <div className="section-group">
-                  <h3>2. QRコード設定</h3>
+                  <h3>3. QRコード設定</h3>
                   <label className="checkbox-group"><input type="checkbox" checked={cardData.showQr} onChange={(e) => setCardData(p => ({...p, showQr: e.target.checked}))} /> <span>表示する</span></label>
                   <input type="text" value={cardData.qrUrl} onChange={(e) => setCardData(p => ({...p, qrUrl: e.target.value}))} placeholder="URL..." className="form-input" />
                 </div>
                 <div className="section-group">
-                  <h3>3. 裏面メッセージ</h3>
+                  <h3>4. 裏面メッセージ</h3>
                   <textarea value={cardData.backMessage} onChange={(e) => setCardData(p => ({...p, backMessage: e.target.value}))} maxLength={100} className="form-input" />
                   <div className="checkbox-group">
                     <input type="checkbox" id="showBackBg" checked={cardData.showBackBg} onChange={(e) => setCardData(p => ({...p, showBackBg: e.target.checked}))} />
@@ -391,7 +391,7 @@ export default function App() {
                 </div>
                 <hr className="divider" />
                 <div className="section-group">
-                  <h3>4. フォント設定</h3>
+                  <h3>5. フォント設定</h3>
                   <div className="template-grid">
                     <button className={`template-btn ${cardData.fontMode === 'gothic' ? 'active' : ''}`} onClick={() => setCardData(p => ({...p, fontMode: 'gothic'}))}>ゴシック体</button>
                     <button className={`template-btn ${cardData.fontMode === 'mincho' ? 'active' : ''}`} onClick={() => setCardData(p => ({...p, fontMode: 'mincho'}))}>明朝体</button>
