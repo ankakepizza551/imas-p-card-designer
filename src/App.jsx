@@ -197,57 +197,106 @@ export default function App() {
     }
   };
 
+  // Safari/iOS では async コールバック内での window.open がブロックされるため、
+  // ユーザー操作と同期のタイミングで先に window を開いておく
+  const isSafariOrIOS = () => {
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) ||
+      (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+    return isIOS || isSafari;
+  };
+
+  // Safari では toPng の初回レンダが崩れることがあるため2回呼ぶ（2回目でキャッシュが効く）
+  const safeToPng = async (el, options) => {
+    if (isSafariOrIOS()) {
+      try { await toPng(el, options); } catch (_) { /* warm-up */ }
+      await new Promise(r => setTimeout(r, 100));
+    }
+    return toPng(el, options);
+  };
+
   const handleExportPNG = async () => {
     if (isExporting) return;
+    // Safari/iOS: window.open はユーザー操作と同期で呼ぶ必要がある
+    const safari = isSafariOrIOS();
+    const winF = safari ? window.open('', '_blank') : null;
+    const winB = safari ? window.open('', '_blank') : null;
     setIsExporting(true);
     try {
       await withBothSidesVisible(async () => {
-        const options = { 
-          pixelRatio: 3, 
-          cacheBust: true, 
+        const isMobile = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+          (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+        const options = {
+          pixelRatio: isMobile ? 2 : 3,
+          cacheBust: true,
           style: { transform: 'none' },
           fontEmbedCSS: '',
         };
-        const f = await toPng(cardRefFront.current, options);
-        const b = await toPng(cardRefBack.current, options);
-        const dl = (u, n) => { 
-          const a = document.createElement('a'); 
-          a.download = n; 
-          a.href = u; 
-          document.body.appendChild(a);
-          a.click(); 
-          document.body.removeChild(a);
-        };
-        dl(f, 'p-card-front.png');
-        setTimeout(() => dl(b, 'p-card-back.png'), 300);
+        const f = await safeToPng(cardRefFront.current, options);
+        const b = await safeToPng(cardRefBack.current, options);
+
+        if (safari) {
+          // iOS/Safari: 事前に開いたウィンドウに画像を書き込む（長押しで保存）
+          const writeImg = (win, dataUrl, label) => {
+            if (!win) return;
+            win.document.write(
+              `<!DOCTYPE html><html><head><meta charset="utf-8">` +
+              `<meta name="viewport" content="width=device-width,initial-scale=1">` +
+              `<title>${label}</title></head>` +
+              `<body style="margin:0;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px">` +
+              `<img src="${dataUrl}" style="max-width:100%;height:auto;border-radius:8px">` +
+              `<p style="color:#fff;font-family:sans-serif;font-size:14px;text-align:center;padding:0 16px">` +
+              `画像を長押し →「写真に保存」を選択してください</p></body></html>`
+            );
+            win.document.close();
+          };
+          writeImg(winF, f, '表面');
+          writeImg(winB, b, '裏面');
+        } else {
+          const dl = (u, n) => {
+            const a = document.createElement('a');
+            a.download = n;
+            a.href = u;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          };
+          dl(f, 'p-card-front.png');
+          setTimeout(() => dl(b, 'p-card-back.png'), 300);
+        }
       });
-    } catch (err) { 
+    } catch (err) {
+      if (winF) winF.close();
+      if (winB) winB.close();
       alert(`保存に失敗しました: ${err.message}`);
-      console.error(err); 
-    } finally { 
-      setIsExporting(false); 
+      console.error(err);
+    } finally {
+      setIsExporting(false);
     }
   };
 
   const handleExportPDF = async () => {
     if (isExporting) return;
+    const safari = isSafariOrIOS();
+    const preWin = safari ? window.open('', '_blank') : null;
     setIsExporting(true);
     try {
       await withBothSidesVisible(async () => {
-        const options = { 
-          pixelRatio: 2, 
-          cacheBust: true, 
+        const options = {
+          pixelRatio: 2,
+          cacheBust: true,
           style: { transform: 'none' },
           fontEmbedCSS: '',
         };
-        const fImg = await toPng(cardRefFront.current, options);
-        const bImg = await toPng(cardRefBack.current, options);
+        const fImg = await safeToPng(cardRefFront.current, options);
+        const bImg = await safeToPng(cardRefBack.current, options);
 
         // 縦A4: 210mm x 297mm / 名刺: 91mm x 55mm → 2列 x 5行 = 10枚
         const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         const cardW = 91, cardH = 55;
-        const marginX = (210 - cardW * 2) / 2;  // 左右中央寄せ ≈ 14mm
-        const marginY = (297 - cardH * 5) / 2;  // 上下中央寄せ ≈ 11mm
+        const marginX = (210 - cardW * 2) / 2;
+        const marginY = (297 - cardH * 5) / 2;
 
         [fImg, bImg].forEach((img, pageIdx) => {
           if (pageIdx > 0) pdf.addPage();
@@ -257,13 +306,24 @@ export default function App() {
             }
           }
         });
-        pdf.save('p-card-print.pdf');
+
+        if (safari && preWin) {
+          // Safari/iOS: blob URL を事前に開いたウィンドウで表示（PDFビューアで開く）
+          const blob = pdf.output('blob');
+          const blobUrl = URL.createObjectURL(blob);
+          preWin.location.href = blobUrl;
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+        } else {
+          if (preWin) preWin.close();
+          pdf.save('p-card-print.pdf');
+        }
       });
-    } catch (err) { 
+    } catch (err) {
+      if (preWin) preWin.close();
       alert(`PDF生成に失敗しました: ${err.message}`);
-      console.error(err); 
-    } finally { 
-      setIsExporting(false); 
+      console.error(err);
+    } finally {
+      setIsExporting(false);
     }
   };
 
