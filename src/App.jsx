@@ -740,7 +740,7 @@ export default function App() {
               </div>
 
               {/* BACK */}
-              <div ref={cardRefBack} className={`card-mockup back template-${cardData.backTemplateId} font-${cardData.fontMode} ${!cardData.showBackBg ? 'no-bg' : ''}`} style={{ '--theme-gradient': themeGradient, '--brand-color': selectedBrand.color, display: activeSide === 'back' ? 'block' : 'none' }}>
+              <div ref={cardRefBack} className={`card-mockup back template-${cardData.backTemplateId} font-${cardData.fontMode} ${!cardData.showBackBg ? 'no-bg' : ''}`} style={{ '--theme-gradient': themeGradient, '--brand-color': selectedBrand.color, '--brand-text': selectedBrand.textColor || '#ffffff', display: activeSide === 'back' ? 'block' : 'none' }}>
                 <div className="card-inner">
                   {cardData.backTemplateId === 'custom' && cardData.backImage && (
                     <div className="back-custom-bg">
