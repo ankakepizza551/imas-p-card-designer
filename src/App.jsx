@@ -26,6 +26,8 @@ const TEMPLATES = [
   { id: 'dynamic', name: 'Dynamic', description: '躍動感のある斜線スタイル' },
   { id: 'modern', name: 'Modern', description: '洗練されたダークモード風' },
   { id: 'ticket', name: 'Ticket', description: 'ライブチケット風デザイン' },
+  { id: 'splash', name: 'Splash', description: 'ダイナミックな分割デザイン' },
+  { id: 'classic', name: 'Classic', description: 'エレガントな罫線デザイン' },
 ];
 
 const BACK_TEMPLATES = [
@@ -60,6 +62,9 @@ export default function App() {
       textHAlign: 'left',
       fontSize: 'medium',
       fontWeight: 'bold',
+      imageScale: 1.0,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
     };
     if (saved) {
       try {
@@ -443,6 +448,33 @@ export default function App() {
                       )}
                     </div>
                   )}
+
+                  <div className="img-adjust-controls">
+                    <div className="img-adjust-header">
+                      <span>画像調整</span>
+                      <button className="reset-adjust-btn" onClick={() => setCardData(p => ({...p, imageScale: 1.0, imageOffsetX: 0, imageOffsetY: 0}))}>リセット</button>
+                    </div>
+                    <div className="form-group">
+                      <label>サイズ: {Math.round(cardData.imageScale * 100)}%</label>
+                      <input type="range" min="40" max="200" value={Math.round(cardData.imageScale * 100)}
+                        onChange={e => setCardData(p => ({...p, imageScale: e.target.value / 100}))}
+                        className="range-input" />
+                    </div>
+                    <div className="form-grid">
+                      <div className="form-group">
+                        <label>横位置: {cardData.imageOffsetX > 0 ? '+' : ''}{cardData.imageOffsetX}%</label>
+                        <input type="range" min="-50" max="50" value={cardData.imageOffsetX}
+                          onChange={e => setCardData(p => ({...p, imageOffsetX: Number(e.target.value)}))}
+                          className="range-input" />
+                      </div>
+                      <div className="form-group">
+                        <label>縦位置: {cardData.imageOffsetY > 0 ? '+' : ''}{cardData.imageOffsetY}%</label>
+                        <input type="range" min="-30" max="30" value={cardData.imageOffsetY}
+                          onChange={e => setCardData(p => ({...p, imageOffsetY: Number(e.target.value)}))}
+                          className="range-input" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <hr className="divider" />
@@ -627,7 +659,10 @@ export default function App() {
               <div ref={cardRefFront} className={`card-mockup template-${cardData.templateId} font-${cardData.fontMode}`} style={{ '--theme-gradient': themeGradient, '--brand-color': selectedBrand.color, display: activeSide === 'front' ? 'block' : 'none' }}>
                 <div className="card-inner">
                   {cardData.imageMode === 'individual' ? (
-                    <div className="idol-images-layer">
+                    <div className="idol-images-layer" style={{
+                      transform: `scale(${cardData.imageScale}) translate(${cardData.imageOffsetX}%, ${cardData.imageOffsetY}%)`,
+                      transformOrigin: 'bottom right',
+                    }}>
                       {cardData.selectedIdols.map((idol, idx) => idol.image && (
                         <img key={idol.id} src={idol.image} className="idol-image-auto animate-in" style={{ '--index': idx }} />
                       ))}
@@ -635,7 +670,10 @@ export default function App() {
                   ) : (
                     cardData.groupImage && (
                       <div className="group-image-layer">
-                        <img src={cardData.groupImage} className="group-image animate-in" />
+                        <img src={cardData.groupImage} className="group-image animate-in" style={{
+                          transform: `scale(${cardData.imageScale}) translate(${cardData.imageOffsetX}%, ${cardData.imageOffsetY}%)`,
+                          transformOrigin: 'right center',
+                        }} />
                       </div>
                     )
                   )}
@@ -664,6 +702,21 @@ export default function App() {
                       <div className="deco-perforation"></div>
                     </>
                   )}
+                  {cardData.templateId === 'splash' && (
+                    <>
+                      <div className="deco-splash"></div>
+                      <div className="deco-splash-line"></div>
+                    </>
+                  )}
+                  {cardData.templateId === 'classic' && (
+                    <>
+                      <div className="deco-frame"></div>
+                      <div className="deco-corner tl"></div>
+                      <div className="deco-corner tr"></div>
+                      <div className="deco-corner bl"></div>
+                      <div className="deco-corner br"></div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -688,7 +741,7 @@ export default function App() {
                     <p className="back-msg">{cardData.backMessage}</p>
                     {cardData.showQr && cardData.qrUrl && (
                       <div className="qr-container">
-                        <QRCodeSVG value={cardData.qrUrl} size={48} level="M" includeMargin={false} />
+                        <QRCodeSVG value={cardData.qrUrl} size={48} level="M" marginSize={0} />
                         <small>SCAN ME</small>
                       </div>
                     )}
