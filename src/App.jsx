@@ -669,10 +669,11 @@ export default function App() {
                   {cardData.imageMode === 'individual' ? (
                     <div className="idol-images-layer">
                       {cardData.selectedIdols.map((idol, idx) => idol.image && (
-                        <img key={idol.id} src={idol.image} className="idol-image-auto animate-in" style={{
+                        <img key={idol.id} src={idol.image} className="idol-image-auto" style={{
                           '--index': idx,
-                          transform: `scale(${idol.imgScale ?? 1}) translate(${idol.imgOffsetX ?? 0}%, ${idol.imgOffsetY ?? 0}%)`,
-                          transformOrigin: 'bottom right',
+                          '--img-scale': idol.imgScale ?? 1,
+                          '--img-x': `${idol.imgOffsetX ?? 0}%`,
+                          '--img-y': `${idol.imgOffsetY ?? 0}%`,
                         }} />
                       ))}
                     </div>
@@ -696,6 +697,7 @@ export default function App() {
                     )}
                     <div className="card-body">
                       <div className="name-area"><span className="p-name">{cardData.name}</span><span className="p-suffix">P</span></div>
+                      {cardData.title && <div className="p-title">{cardData.title}</div>}
                       <div className="idol-area">
                         {cardData.selectedIdols.map(i => i.name + (cardData.showTanto ? '担当' : '')).join(' / ')}
                       </div>

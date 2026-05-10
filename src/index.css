@@ -92,6 +92,8 @@ select.form-input { appearance: auto; cursor: pointer; }
 
 .p-name { font-size: 2.4rem; font-weight: 900; line-height: 1; color: #1a202c; letter-spacing: -0.02em; }
 .p-suffix { font-size: 1.2rem; font-weight: 800; margin-left: 0.2rem; color: #1a202c; }
+.p-title { font-size: 0.72rem; font-weight: 700; color: var(--brand-color); letter-spacing: 0.12em; margin-top: 0.2rem; opacity: 0.9; }
+.template-modern .p-title { color: rgba(255,255,255,0.65); }
 .brand-label { font-size: 0.8rem; font-weight: 900; color: var(--brand-color); letter-spacing: 0.15em; }
 .idol-area { font-size: 0.85rem; color: #4a5568; margin-top: 0.6rem; font-weight: 700; }
 .sns-label { font-size: 0.8rem; color: #718096; font-weight: 600; }
@@ -121,7 +123,15 @@ select.form-input { appearance: auto; cursor: pointer; }
 .mode-btn.active small { color: #2b6cb0; }
 
 .idol-images-layer { position: absolute; inset: 0; left: 35%; z-index: 10; pointer-events: none; }
-.idol-image-auto { position: absolute; height: 110%; bottom: -5%; object-fit: contain; right: calc(var(--index) * 12% - 5%); filter: drop-shadow(-10px 10px 20px rgba(0,0,0,0.3)); }
+.idol-image-auto {
+  position: absolute; height: 110%; bottom: -5%; object-fit: contain;
+  right: calc(var(--index) * 12% - 5%);
+  filter: drop-shadow(-10px 10px 20px rgba(0,0,0,0.3));
+  transform: scale(var(--img-scale, 1)) translate(var(--img-x, 0%), var(--img-y, 0%));
+  transform-origin: bottom right;
+  animation: idolFadeIn 0.4s ease forwards;
+}
+@keyframes idolFadeIn { from { opacity: 0; } to { opacity: 1; } }
 .group-image-layer { position: absolute; inset: 0; z-index: 10; pointer-events: none; display: flex; align-items: center; justify-content: flex-end; }
 .group-image { height: 100%; max-width: 70%; object-fit: contain; object-position: right center; filter: drop-shadow(-10px 10px 25px rgba(0,0,0,0.3)); }
 
@@ -199,18 +209,21 @@ select.form-input { appearance: auto; cursor: pointer; }
 /* FONT SIZE VARIATIONS */
 .f-size-small .p-name { font-size: 1.8rem; }
 .f-size-small .p-suffix { font-size: 0.9rem; }
+.f-size-small .p-title { font-size: 0.6rem; }
 .f-size-small .brand-label { font-size: 0.65rem; }
 .f-size-small .idol-area { font-size: 0.7rem; }
 .f-size-small .sns-label { font-size: 0.7rem; }
 
 .f-size-medium .p-name { font-size: 2.4rem; }
 .f-size-medium .p-suffix { font-size: 1.2rem; }
+.f-size-medium .p-title { font-size: 0.72rem; }
 .f-size-medium .brand-label { font-size: 0.8rem; }
 .f-size-medium .idol-area { font-size: 0.85rem; }
 .f-size-medium .sns-label { font-size: 0.8rem; }
 
 .f-size-large .p-name { font-size: 3rem; }
 .f-size-large .p-suffix { font-size: 1.5rem; }
+.f-size-large .p-title { font-size: 0.85rem; }
 .f-size-large .brand-label { font-size: 1rem; }
 .f-size-large .idol-area { font-size: 1rem; }
 .f-size-large .sns-label { font-size: 0.9rem; }
