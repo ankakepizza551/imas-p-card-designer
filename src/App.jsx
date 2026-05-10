@@ -61,6 +61,9 @@ export default function App() {
       showBrand: true,
       textVAlign: 'top',
       textHAlign: 'left',
+      textFreePos: false,
+      textX: 8,
+      textY: 8,
       fontSize: 'medium',
       fontWeight: 'bold',
       imageScale: 1.0,
@@ -171,6 +174,32 @@ export default function App() {
         return { ...prev, selectedIdols: arrayMove(prev.selectedIdols, oldIndex, newIndex) };
       });
     }
+  };
+
+  const handleTextDragStart = (e) => {
+    if (isExporting) return;
+    e.preventDefault();
+    const card = cardRefFront.current;
+    const rect = card.getBoundingClientRect();
+    const getXY = (ev) => ev.touches
+      ? { x: ev.touches[0].clientX, y: ev.touches[0].clientY }
+      : { x: ev.clientX, y: ev.clientY };
+    const onMove = (mv) => {
+      const { x, y } = getXY(mv);
+      const nx = Math.max(0, Math.min(80, (x - rect.left) / rect.width * 100));
+      const ny = Math.max(0, Math.min(85, (y - rect.top) / rect.height * 100));
+      setCardData(p => ({ ...p, textX: +nx.toFixed(1), textY: +ny.toFixed(1) }));
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onUp);
   };
 
   const handleIdolImageUpload = (idolId, e) => {
@@ -559,22 +588,58 @@ export default function App() {
 
                 <div className="section-group">
                   <h3>5. テキスト位置</h3>
-                  <div className="form-group">
-                    <label>縦方向</label>
-                    <div className="text-pos-grid">
-                      {[{id:'top',label:'上'},{id:'center',label:'中央'},{id:'bottom',label:'下'}].map(p => (
-                        <button key={p.id} className={`pos-btn ${cardData.textVAlign === p.id ? 'active' : ''}`} onClick={() => setCardData(d => ({...d, textVAlign: p.id}))}>{p.label}</button>
-                      ))}
-                    </div>
+                  <div className="text-pos-grid" style={{ marginBottom: '1rem' }}>
+                    <button className={`pos-btn ${!cardData.textFreePos ? 'active' : ''}`} onClick={() => setCardData(p => ({...p, textFreePos: false}))}>固定位置</button>
+                    <button className={`pos-btn ${cardData.textFreePos ? 'active' : ''}`} onClick={() => setCardData(p => ({...p, textFreePos: true}))}>自由配置</button>
                   </div>
-                  <div className="form-group">
-                    <label>横方向</label>
-                    <div className="text-pos-grid">
-                      {[{id:'left',label:'左寄せ'},{id:'right',label:'右寄せ'}].map(p => (
-                        <button key={p.id} className={`pos-btn ${cardData.textHAlign === p.id ? 'active' : ''}`} onClick={() => setCardData(d => ({...d, textHAlign: p.id}))}>{p.label}</button>
-                      ))}
-                    </div>
-                  </div>
+                  {!cardData.textFreePos ? (
+                    <>
+                      <div className="form-group">
+                        <label>縦方向</label>
+                        <div className="text-pos-grid">
+                          {[{id:'top',label:'上'},{id:'center',label:'中央'},{id:'bottom',label:'下'}].map(p => (
+                            <button key={p.id} className={`pos-btn ${cardData.textVAlign === p.id ? 'active' : ''}`} onClick={() => setCardData(d => ({...d, textVAlign: p.id}))}>{p.label}</button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label>横方向</label>
+                        <div className="text-pos-grid">
+                          {[{id:'left',label:'左寄せ'},{id:'right',label:'右寄せ'}].map(p => (
+                            <button key={p.id} className={`pos-btn ${cardData.textHAlign === p.id ? 'active' : ''}`} onClick={() => setCardData(d => ({...d, textHAlign: p.id}))}>{p.label}</button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="pos-hint">プレビューのテキストをドラッグして自由に移動できます</p>
+                      <div className="form-grid">
+                        <div className="form-group">
+                          <label>横: {Math.round(cardData.textX ?? 8)}%</label>
+                          <input type="range" min="0" max="80" value={Math.round(cardData.textX ?? 8)}
+                            onChange={e => setCardData(p => ({...p, textX: Number(e.target.value)}))}
+                            className="range-input" />
+                        </div>
+                        <div className="form-group">
+                          <label>縦: {Math.round(cardData.textY ?? 8)}%</label>
+                          <input type="range" min="0" max="85" value={Math.round(cardData.textY ?? 8)}
+                            onChange={e => setCardData(p => ({...p, textY: Number(e.target.value)}))}
+                            className="range-input" />
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label>横揃え</label>
+                        <div className="text-pos-grid">
+                          {[{id:'left',label:'左寄せ'},{id:'right',label:'右寄せ'}].map(p => (
+                            <button key={p.id} className={`pos-btn ${cardData.textHAlign === p.id ? 'active' : ''}`} onClick={() => setCardData(d => ({...d, textHAlign: p.id}))}>{p.label}</button>
+                          ))}
+                        </div>
+                      </div>
+                      <button className="reset-adjust-btn" style={{ marginTop: '0.8rem' }}
+                        onClick={() => setCardData(p => ({...p, textX: 8, textY: 8}))}>位置リセット</button>
+                    </>
+                  )}
                 </div>
 
                 <hr className="divider" />
@@ -695,7 +760,12 @@ export default function App() {
                       </div>
                     )
                   )}
-                  <div className={`card-content text-v-${cardData.textVAlign} text-h-${cardData.textHAlign} f-size-${cardData.fontSize} f-weight-${cardData.fontWeight}`}>
+                  <div
+                    className={`card-content${cardData.textFreePos ? ' free-pos' : ''} text-v-${cardData.textVAlign} text-h-${cardData.textHAlign} f-size-${cardData.fontSize} f-weight-${cardData.fontWeight}`}
+                    style={cardData.textFreePos ? { left: `${cardData.textX ?? 8}%`, top: `${cardData.textY ?? 8}%` } : {}}
+                    onMouseDown={cardData.textFreePos && !isExporting ? handleTextDragStart : undefined}
+                    onTouchStart={cardData.textFreePos && !isExporting ? handleTextDragStart : undefined}
+                  >
                     {cardData.showBrand && (
                       <div className="card-header">
                         <span className="brand-label">
