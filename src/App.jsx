@@ -57,6 +57,7 @@ export default function App() {
       backImage: null,
       fontMode: 'gothic',
       showTanto: true,
+      showIdols: true,
       showBackBg: true,
       showBrand: true,
       textVAlign: 'top',
@@ -575,8 +576,12 @@ export default function App() {
                     }} />
                   </div>
                   <div className="checkbox-group">
-                    <input type="checkbox" id="showTanto" checked={cardData.showTanto} onChange={(e) => setCardData(p => ({...p, showTanto: e.target.checked}))} />
-                    <label htmlFor="showTanto">アイドル名の後に「担当」をつける</label>
+                    <input type="checkbox" id="showIdols" checked={cardData.showIdols} onChange={(e) => setCardData(p => ({...p, showIdols: e.target.checked}))} />
+                    <label htmlFor="showIdols">担当アイドル名を表示する</label>
+                  </div>
+                  <div className="checkbox-group">
+                    <input type="checkbox" id="showTanto" checked={cardData.showTanto} disabled={!cardData.showIdols} onChange={(e) => setCardData(p => ({...p, showTanto: e.target.checked}))} />
+                    <label htmlFor="showTanto" style={{ opacity: cardData.showIdols ? 1 : 0.4 }}>アイドル名の後に「担当」をつける</label>
                   </div>
                   <div className="checkbox-group">
                     <input type="checkbox" id="showBrand" checked={cardData.showBrand} onChange={(e) => setCardData(p => ({...p, showBrand: e.target.checked}))} />
@@ -776,9 +781,9 @@ export default function App() {
                     <div className="card-body">
                       <div className="name-area"><span className="p-name">{cardData.name}</span><span className="p-suffix">P</span></div>
                       {cardData.title && <div className="p-title">{cardData.title}</div>}
-                      <div className="idol-area">
+                      {cardData.showIdols && <div className="idol-area">
                         {cardData.selectedIdols.map(i => i.name + (cardData.showTanto ? '担当' : '')).join(' / ')}
-                      </div>
+                      </div>}
                     </div>
                     <div className="card-footer"><span className="sns-label">𝕏 {cardData.snsId}</span></div>
                   </div>
