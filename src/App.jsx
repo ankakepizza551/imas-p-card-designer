@@ -40,7 +40,7 @@ export default function App() {
     const defaultData = {
       templateId: 'standard',
       backTemplateId: 'idolfull',
-      brandId: 'allstars',
+      brandIds: ['allstars'],
       name: 'プロデューサー',
       title: 'PRODUCER',
       snsId: '@twitter_id',
@@ -63,6 +63,10 @@ export default function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        // 互換性処理: brandId(単体)をbrandIds(配列)に変換
+        if (parsed.brandId && !parsed.brandIds) {
+          parsed.brandIds = [parsed.brandId];
+        }
         return { 
           ...defaultData, 
           ...parsed, 
@@ -98,15 +102,17 @@ export default function App() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const selectedBrand = BRANDS[cardData.brandId] || BRANDS.allstars;
+  const selectedBrand = BRANDS[cardData.brandIds[0]] || BRANDS.allstars;
   
   const themeGradient = useMemo(() => {
     const colors = cardData.selectedIdols.length > 0 
       ? cardData.selectedIdols.map(idol => idol.hex)
-      : [selectedBrand.color, selectedBrand.color];
+      : (cardData.brandIds.length > 1 
+          ? cardData.brandIds.map(id => BRANDS[id].color)
+          : [selectedBrand.color, selectedBrand.color]);
     if (colors.length === 1) return colors[0];
     return `linear-gradient(135deg, ${colors.join(', ')})`;
-  }, [cardData.selectedIdols, selectedBrand.color]);
+  }, [cardData.selectedIdols, cardData.brandIds, selectedBrand.color]);
 
   const filteredIdols = useMemo(() => {
     const s = idolSearch.toLowerCase();
@@ -379,10 +385,21 @@ export default function App() {
                 <div className="section-group">
                   <h3>4. プロフィール設定</h3>
                   <div className="form-group">
-                    <label>ブランド</label>
-                    <select className="form-input" value={cardData.brandId} onChange={(e) => setCardData(p => ({...p, brandId: e.target.value}))}>
-                      {BRAND_LIST.map(id => <option key={id} value={id}>{BRANDS[id].name}</option>)}
-                    </select>
+                    <label>ブランド (複数選択可)</label>
+                    <div className="unit-tabs" style={{ marginTop: '0.5rem' }}>
+                      {BRAND_LIST.map(id => (
+                        <button key={id} className={`unit-tab-btn ${cardData.brandIds.includes(id) ? 'active' : ''}`} style={{ '--unit-color': BRANDS[id].color }} onClick={() => {
+                          setCardData(p => {
+                            const ids = p.brandIds.includes(id) 
+                              ? (p.brandIds.length > 1 ? p.brandIds.filter(x => x !== id) : p.brandIds)
+                              : [...p.brandIds, id];
+                            return { ...p, brandIds: ids };
+                          });
+                        }}>
+                          {BRANDS[id].name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   <div className="form-grid">
                     <div className="form-group">
@@ -545,7 +562,13 @@ export default function App() {
                     )
                   )}
                   <div className={`card-content text-v-${cardData.textVAlign} text-h-${cardData.textHAlign} f-size-${cardData.fontSize} f-weight-${cardData.fontWeight}`}>
-                    {cardData.showBrand && <div className="card-header"><span className="brand-label">{selectedBrand.name}</span></div>}
+                    {cardData.showBrand && (
+                      <div className="card-header">
+                        <span className="brand-label">
+                          {cardData.brandIds.map(id => BRANDS[id]?.name || id).join(' / ')}
+                        </span>
+                      </div>
+                    )}
                     <div className="card-body">
                       <div className="name-area"><span className="p-name">{cardData.name}</span><span className="p-suffix">P</span></div>
                       <div className="idol-area">
