@@ -61,6 +61,7 @@ export default function App() {
       showBackBg: true,
       showBrand: true,
       showSns: true,
+      showPSuffix: true,
       textVAlign: 'top',
       textHAlign: 'left',
       textFreePos: false,
@@ -585,6 +586,10 @@ export default function App() {
                     <label htmlFor="showTanto" style={{ opacity: cardData.showIdols ? 1 : 0.4 }}>アイドル名の後に「担当」をつける</label>
                   </div>
                   <div className="checkbox-group">
+                    <input type="checkbox" id="showPSuffix" checked={cardData.showPSuffix} onChange={(e) => setCardData(p => ({...p, showPSuffix: e.target.checked}))} />
+                    <label htmlFor="showPSuffix">名前の後に「P」をつける</label>
+                  </div>
+                  <div className="checkbox-group">
                     <input type="checkbox" id="showSns" checked={cardData.showSns} onChange={(e) => setCardData(p => ({...p, showSns: e.target.checked}))} />
                     <label htmlFor="showSns">X アカウントを表示する</label>
                   </div>
@@ -784,7 +789,7 @@ export default function App() {
                       </div>
                     )}
                     <div className="card-body">
-                      <div className="name-area"><span className="p-name">{cardData.name}</span><span className="p-suffix">P</span></div>
+                      <div className="name-area"><span className="p-name">{cardData.name}</span>{cardData.showPSuffix && <span className="p-suffix">P</span>}</div>
                       {cardData.title && <div className="p-title">{cardData.title}</div>}
                       {cardData.showIdols && <div className="idol-area">
                         {cardData.selectedIdols.map(i => i.name + (cardData.showTanto ? '担当' : '')).join(' / ')}
