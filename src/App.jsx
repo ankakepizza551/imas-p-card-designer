@@ -57,6 +57,8 @@ export default function App() {
       showBrand: true,
       textVAlign: 'top',
       textHAlign: 'left',
+      fontSize: 'medium',
+      fontWeight: 'bold',
     };
     if (saved) {
       try {
@@ -436,6 +438,28 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+
+                <hr className="divider" />
+
+                <div className="section-group">
+                  <h3>6. テキスト詳細</h3>
+                  <div className="form-group">
+                    <label>サイズ</label>
+                    <div className="text-pos-grid">
+                      {[{id:'small',label:'小'},{id:'medium',label:'中'},{id:'large',label:'大'}].map(p => (
+                        <button key={p.id} className={`pos-btn ${cardData.fontSize === p.id ? 'active' : ''}`} onClick={() => setCardData(d => ({...d, fontSize: p.id}))}>{p.label}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>太さ</label>
+                    <div className="text-pos-grid">
+                      {[{id:'normal',label:'標準'},{id:'bold',label:'太字'}].map(p => (
+                        <button key={p.id} className={`pos-btn ${cardData.fontWeight === p.id ? 'active' : ''}`} onClick={() => setCardData(d => ({...d, fontWeight: p.id}))}>{p.label}</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="animate-in">
@@ -518,7 +542,7 @@ export default function App() {
                       </div>
                     )
                   )}
-                  <div className={`card-content text-v-${cardData.textVAlign} text-h-${cardData.textHAlign}`}>
+                  <div className={`card-content text-v-${cardData.textVAlign} text-h-${cardData.textHAlign} f-size-${cardData.fontSize} f-weight-${cardData.fontWeight}`}>
                     {cardData.showBrand && <div className="card-header"><span className="brand-label">{selectedBrand.name}</span></div>}
                     <div className="card-body">
                       <div className="name-area"><span className="p-name">{cardData.name}</span><span className="p-suffix">P</span></div>

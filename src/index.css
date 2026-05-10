@@ -134,9 +134,9 @@ select.form-input { appearance: auto; cursor: pointer; }
 
 /* TEXT POSITION CONTROLS */
 .text-pos-grid { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
-.pos-btn { flex: 1; padding: 0.7rem 0.5rem; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; color: #4a5568; cursor: pointer; font-weight: 800; font-size: 0.8rem; transition: 0.2s; }
+.pos-btn { flex: 1 1 0%; min-width: 0; padding: 0.7rem 0.5rem; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; color: #4a5568; cursor: pointer; font-weight: 800; font-size: 0.8rem; transition: 0.2s; position: relative; z-index: 5; }
 .pos-btn:hover { border-color: #cbd5e0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-.pos-btn.active { border-color: #2681c8; background: #ebf4ff; color: #1a365d; }
+.pos-btn.active { border-color: #2681c8; background: #ebf4ff; color: #1a365d; z-index: 6; }
 
 /* CARD TEXT ALIGNMENT */
 .card-content.text-v-top { justify-content: flex-start; }
@@ -144,6 +144,32 @@ select.form-input { appearance: auto; cursor: pointer; }
 .card-content.text-v-bottom { justify-content: flex-end; }
 .card-content.text-h-left { text-align: left; align-items: flex-start; }
 .card-content.text-h-right { text-align: right; align-items: flex-end; }
+
+/* FONT SIZE VARIATIONS */
+.f-size-small .p-name { font-size: 1.8rem; }
+.f-size-small .p-suffix { font-size: 0.9rem; }
+.f-size-small .brand-label { font-size: 0.65rem; }
+.f-size-small .idol-area { font-size: 0.7rem; }
+.f-size-small .sns-label { font-size: 0.7rem; }
+
+.f-size-medium .p-name { font-size: 2.4rem; }
+.f-size-medium .p-suffix { font-size: 1.2rem; }
+.f-size-medium .brand-label { font-size: 0.8rem; }
+.f-size-medium .idol-area { font-size: 0.85rem; }
+.f-size-medium .sns-label { font-size: 0.8rem; }
+
+.f-size-large .p-name { font-size: 3rem; }
+.f-size-large .p-suffix { font-size: 1.5rem; }
+.f-size-large .brand-label { font-size: 1rem; }
+.f-size-large .idol-area { font-size: 1rem; }
+.f-size-large .sns-label { font-size: 0.9rem; }
+
+/* FONT WEIGHT VARIATIONS */
+.f-weight-normal .p-name, .f-weight-normal .p-suffix, .f-weight-normal .brand-label, .f-weight-normal .idol-area, .f-weight-normal .sns-label { font-weight: 500; }
+.f-weight-bold .p-name, .f-weight-bold .p-suffix { font-weight: 900; }
+.f-weight-bold .brand-label { font-weight: 900; }
+.f-weight-bold .idol-area { font-weight: 700; }
+.f-weight-bold .sns-label { font-weight: 600; }
 
 @media (max-width: 1000px) {
   .main-content { grid-template-columns: 1fr; }
