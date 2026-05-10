@@ -60,6 +60,7 @@ export default function App() {
       showIdols: true,
       showBackBg: true,
       showBrand: true,
+      showSns: true,
       textVAlign: 'top',
       textHAlign: 'left',
       textFreePos: false,
@@ -584,6 +585,10 @@ export default function App() {
                     <label htmlFor="showTanto" style={{ opacity: cardData.showIdols ? 1 : 0.4 }}>アイドル名の後に「担当」をつける</label>
                   </div>
                   <div className="checkbox-group">
+                    <input type="checkbox" id="showSns" checked={cardData.showSns} onChange={(e) => setCardData(p => ({...p, showSns: e.target.checked}))} />
+                    <label htmlFor="showSns">X アカウントを表示する</label>
+                  </div>
+                  <div className="checkbox-group">
                     <input type="checkbox" id="showBrand" checked={cardData.showBrand} onChange={(e) => setCardData(p => ({...p, showBrand: e.target.checked}))} />
                     <label htmlFor="showBrand">ブランド名を表示する</label>
                   </div>
@@ -785,7 +790,7 @@ export default function App() {
                         {cardData.selectedIdols.map(i => i.name + (cardData.showTanto ? '担当' : '')).join(' / ')}
                       </div>}
                     </div>
-                    <div className="card-footer"><span className="sns-label">𝕏 {cardData.snsId}</span></div>
+                    {cardData.showSns && <div className="card-footer"><span className="sns-label">𝕏 {cardData.snsId}</span></div>}
                   </div>
                   {cardData.templateId === 'standard' && <div className="deco-stripe"></div>}
                   {cardData.templateId === 'dynamic' && <div className="deco-lines"></div>}
