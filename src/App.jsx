@@ -41,6 +41,7 @@ export default function App() {
       templateId: 'standard',
       backTemplateId: 'idolfull',
       brandIds: ['allstars'],
+      mainBrandId: 'allstars',
       name: 'プロデューサー',
       title: 'PRODUCER',
       snsId: '@twitter_id',
@@ -66,6 +67,10 @@ export default function App() {
         // 互換性処理: brandId(単体)をbrandIds(配列)に変換
         if (parsed.brandId && !parsed.brandIds) {
           parsed.brandIds = [parsed.brandId];
+          parsed.mainBrandId = parsed.brandId;
+        }
+        if (parsed.brandIds && !parsed.mainBrandId) {
+          parsed.mainBrandId = parsed.brandIds[0];
         }
         return { 
           ...defaultData, 
@@ -102,7 +107,7 @@ export default function App() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const selectedBrand = BRANDS[cardData.brandIds[0]] || BRANDS.allstars;
+  const selectedBrand = BRANDS[cardData.mainBrandId] || BRANDS[cardData.brandIds[0]] || BRANDS.allstars;
   
   const themeGradient = useMemo(() => {
     const colors = cardData.selectedIdols.length > 0 
@@ -385,20 +390,33 @@ export default function App() {
                 <div className="section-group">
                   <h3>4. プロフィール設定</h3>
                   <div className="form-group">
-                    <label>ブランド (複数選択可)</label>
+                    <label>ブランド (複数選択可 / ★をクリックでメイン設定)</label>
                     <div className="unit-tabs" style={{ marginTop: '0.5rem' }}>
-                      {BRAND_LIST.map(id => (
-                        <button key={id} className={`unit-tab-btn ${cardData.brandIds.includes(id) ? 'active' : ''}`} style={{ '--unit-color': BRANDS[id].color }} onClick={() => {
-                          setCardData(p => {
-                            const ids = p.brandIds.includes(id) 
-                              ? (p.brandIds.length > 1 ? p.brandIds.filter(x => x !== id) : p.brandIds)
-                              : [...p.brandIds, id];
-                            return { ...p, brandIds: ids };
-                          });
-                        }}>
-                          {BRANDS[id].name}
-                        </button>
-                      ))}
+                      {BRAND_LIST.map(id => {
+                        const isSelected = cardData.brandIds.includes(id);
+                        const isMain = cardData.mainBrandId === id;
+                        return (
+                          <div key={id} className="brand-select-item">
+                            <button className={`unit-tab-btn ${isSelected ? 'active' : ''}`} style={{ '--unit-color': BRANDS[id].color }} onClick={() => {
+                              setCardData(p => {
+                                let nextIds = p.brandIds.includes(id) 
+                                  ? (p.brandIds.length > 1 ? p.brandIds.filter(x => x !== id) : p.brandIds)
+                                  : [...p.brandIds, id];
+                                let nextMain = p.mainBrandId;
+                                if (!nextIds.includes(nextMain)) nextMain = nextIds[0];
+                                return { ...p, brandIds: nextIds, mainBrandId: nextMain };
+                              });
+                            }}>
+                              {BRANDS[id].name}
+                            </button>
+                            {isSelected && (
+                              <button className={`main-set-btn ${isMain ? 'active' : ''}`} title="メインに設定" onClick={() => setCardData(p => ({...p, mainBrandId: id}))}>
+                                {isMain ? '★' : '☆'}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                   <div className="form-grid">
@@ -604,7 +622,9 @@ export default function App() {
                     </div>
                   )}
                   <div className="back-content">
-                    <div className="brand-logo-large">{selectedBrand.id === 'allstars' ? '765PRO' : selectedBrand.name}</div>
+                    <div className="brand-logo-large">
+                      {cardData.brandIds.length > 3 ? 'PRODUCER' : cardData.brandIds.map(id => id === 'allstars' ? '765PRO' : (BRANDS[id]?.name || id)).join(' / ')}
+                    </div>
                     <p className="back-msg">{cardData.backMessage}</p>
                     {cardData.showQr && cardData.qrUrl && (
                       <div className="qr-container">

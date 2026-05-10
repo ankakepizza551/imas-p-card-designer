@@ -124,6 +124,19 @@ select.form-input { appearance: auto; cursor: pointer; }
 .idol-item:hover { background: #f7fafc; border-color: #edf2f7; transform: translateX(2px); }
 .color-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(0,0,0,0.05); }
 
+/* BRAND SELECT ENHANCEMENTS */
+.brand-select-item { display: flex; align-items: center; gap: 2px; }
+.main-set-btn { 
+  background: #edf2f7; border: 1px solid #e2e8f0; border-radius: 50%; 
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; 
+  font-size: 0.7rem; cursor: pointer; transition: 0.2s; color: #a0aec0;
+}
+.main-set-btn:hover { background: #fff; color: #ecc94b; border-color: #ecc94b; }
+.main-set-btn.active { background: #ecc94b; color: #fff; border-color: #ecc94b; box-shadow: 0 2px 6px rgba(236,201,75,0.3); }
+
+.brand-logo-large { font-size: 2.5rem; font-weight: 900; letter-spacing: 0.05em; text-shadow: 0 2px 10px rgba(0,0,0,0.1); word-break: break-all; line-height: 1.1; }
+.brand-logo-large:has(span) { font-size: 1.5rem; } /* スラッシュ区切りで長くなった場合用 */
+
 .idol-tag { background: #fff; padding: 0.8rem 1rem; border-radius: 16px; display: flex; align-items: center; gap: 1rem; border: 1px solid #e2e8f0; margin-bottom: 0.8rem; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
 .tag-name { flex: 1; font-weight: 800; font-size: 0.95rem; color: #1a202c; }
 .tag-icon-btn { background: #f7fafc; border: 1px solid #edf2f7; width: 32px; height: 32px; border-radius: 10px; color: #4a5568; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: 0.2s; }
