@@ -6,9 +6,34 @@
 
 /* HEADER */
 .app-header { height: 180px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 2rem; background: #fff; border-bottom: 1px solid #e2e8f0; }
-.header-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); opacity: 0.5; }
+.app-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  background: linear-gradient(90deg,
+    #f12520 0%     16.666%,
+    #2681c8 16.666% 33.333%,
+    #ffc30b 33.333% 50%,
+    #30bb94 50%    66.666%,
+    #8dbaff 66.666% 83.333%,
+    #ff6600 83.333% 100%
+  );
+  z-index: 20;
+}
+.header-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg,
+    rgba(241,37,32,0.04) 0%,
+    rgba(38,129,200,0.04) 20%,
+    rgba(255,195,11,0.04) 40%,
+    rgba(48,187,148,0.04) 60%,
+    rgba(141,186,255,0.04) 80%,
+    rgba(255,102,0,0.04) 100%
+  );
+}
 .header-content { position: relative; z-index: 10; text-align: center; }
-.allstars-text { font-size: 3rem; font-weight: 900; background: linear-gradient(45deg, #1a365d, #2681c8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
+.allstars-text { font-size: 3rem; font-weight: 900; background: linear-gradient(90deg, #f12520, #2681c8 25%, #ffc30b 45%, #30bb94 65%, #8dbaff 82%, #ff6600); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
 .subtitle { color: #718096; letter-spacing: 0.3em; font-size: 0.8rem; margin-top: 0.5rem; font-weight: 700; }
 
 .main-content { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 420px 1fr; gap: 2.5rem; padding: 0 1.5rem; }
