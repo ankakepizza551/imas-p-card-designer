@@ -162,35 +162,49 @@ export default function App() {
     }
   };
 
+  // 書き出し前に両面を一時的に表示し、終了後に元に戻すヘルパー
+  const withBothSidesVisible = async (fn) => {
+    const frontEl = cardRefFront.current;
+    const backEl = cardRefBack.current;
+    const origFront = frontEl.style.display;
+    const origBack = backEl.style.display;
+    // 両面を強制表示（非表示側もレンダリングさせる）
+    frontEl.style.display = 'block';
+    backEl.style.display = 'block';
+    // レイアウト反映を待つ
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    try {
+      return await fn();
+    } finally {
+      frontEl.style.display = origFront;
+      backEl.style.display = origBack;
+    }
+  };
+
   const handleExportPNG = async () => {
     if (isExporting) return;
     setIsExporting(true);
     try {
-      const options = { 
-        pixelRatio: 3, 
-        cacheBust: true, 
-        style: { transform: 'none' },
-        fontEmbedCSS: '', // フォントエラーで止まるのを防ぐ
-      };
-      
-      const f = await toPng(cardRefFront.current, options).catch(e => {
-        console.error('Front export failed:', e);
-        throw new Error('表面の画像生成に失敗しました');
+      await withBothSidesVisible(async () => {
+        const options = { 
+          pixelRatio: 3, 
+          cacheBust: true, 
+          style: { transform: 'none' },
+          fontEmbedCSS: '',
+        };
+        const f = await toPng(cardRefFront.current, options);
+        const b = await toPng(cardRefBack.current, options);
+        const dl = (u, n) => { 
+          const a = document.createElement('a'); 
+          a.download = n; 
+          a.href = u; 
+          document.body.appendChild(a);
+          a.click(); 
+          document.body.removeChild(a);
+        };
+        dl(f, 'p-card-front.png');
+        setTimeout(() => dl(b, 'p-card-back.png'), 300);
       });
-      const b = await toPng(cardRefBack.current, options).catch(e => {
-        console.error('Back export failed:', e);
-        throw new Error('裏面の画像生成に失敗しました');
-      });
-
-      const dl = (u, n) => { 
-        const a = document.createElement('a'); 
-        a.download = n; 
-        a.href = u; 
-        document.body.appendChild(a);
-        a.click(); 
-        document.body.removeChild(a);
-      };
-      dl(f, `p-card-front.png`); dl(b, `p-card-back.png`);
     } catch (err) { 
       alert(`保存に失敗しました: ${err.message}`);
       console.error(err); 
@@ -203,37 +217,32 @@ export default function App() {
     if (isExporting) return;
     setIsExporting(true);
     try {
-      const options = { 
-        pixelRatio: 2, 
-        cacheBust: true, 
-        style: { transform: 'none' },
-        fontEmbedCSS: '',
-      };
-      
-      const fImg = await toPng(cardRefFront.current, options).catch(e => {
-        console.error('Front PDF export failed:', e);
-        throw new Error('表面の画像生成に失敗しました');
-      });
-      const bImg = await toPng(cardRefBack.current, options).catch(e => {
-        console.error('Back PDF export failed:', e);
-        throw new Error('裏面の画像生成に失敗しました');
-      });
+      await withBothSidesVisible(async () => {
+        const options = { 
+          pixelRatio: 2, 
+          cacheBust: true, 
+          style: { transform: 'none' },
+          fontEmbedCSS: '',
+        };
+        const fImg = await toPng(cardRefFront.current, options);
+        const bImg = await toPng(cardRefBack.current, options);
 
-      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-      const cardW = 91, cardH = 55, marginX = 14, marginY = 22;
-      
-      [fImg, bImg].forEach((img, pageIdx) => {
-        if (pageIdx > 0) pdf.addPage();
-        for (let i = 0; i < 5; i++) {
-          for (let j = 0; j < 2; j++) {
-            // 画像が空文字や不正なデータでないか最低限チェック
-            if (img && img.startsWith('data:image/png;base64,')) {
-              pdf.addImage(img, 'PNG', marginX + j * cardW, marginY + i * cardH, cardW, cardH);
+        // 縦A4: 210mm x 297mm / 名刺: 91mm x 55mm → 2列 x 5行 = 10枚
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const cardW = 91, cardH = 55;
+        const marginX = (210 - cardW * 2) / 2;  // 左右中央寄せ ≈ 14mm
+        const marginY = (297 - cardH * 5) / 2;  // 上下中央寄せ ≈ 11mm
+
+        [fImg, bImg].forEach((img, pageIdx) => {
+          if (pageIdx > 0) pdf.addPage();
+          for (let row = 0; row < 5; row++) {
+            for (let col = 0; col < 2; col++) {
+              pdf.addImage(img, 'PNG', marginX + col * cardW, marginY + row * cardH, cardW, cardH);
             }
           }
-        }
+        });
+        pdf.save('p-card-print.pdf');
       });
-      pdf.save(`p-card-print.pdf`);
     } catch (err) { 
       alert(`PDF生成に失敗しました: ${err.message}`);
       console.error(err); 
