@@ -634,12 +634,12 @@ export default function App() {
                   </div>
                 )}
                 <div className="section-group">
-                  <h3>3. QRコード設定</h3>
+                  <h3>{cardData.backTemplateId === 'custom' ? '3' : '2'}. QRコード設定</h3>
                   <label className="checkbox-group"><input type="checkbox" checked={cardData.showQr} onChange={(e) => setCardData(p => ({...p, showQr: e.target.checked}))} /> <span>表示する</span></label>
                   <input type="text" value={cardData.qrUrl} onChange={(e) => setCardData(p => ({...p, qrUrl: e.target.value}))} placeholder="URL..." className="form-input" />
                 </div>
                 <div className="section-group">
-                  <h3>4. 裏面メッセージ</h3>
+                  <h3>{cardData.backTemplateId === 'custom' ? '4' : '3'}. 裏面メッセージ</h3>
                   <textarea value={cardData.backMessage} onChange={(e) => setCardData(p => ({...p, backMessage: e.target.value}))} maxLength={100} className="form-input" />
                   <div className="checkbox-group">
                     <input type="checkbox" id="showBackBg" checked={cardData.showBackBg} onChange={(e) => setCardData(p => ({...p, showBackBg: e.target.checked}))} />
