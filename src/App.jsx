@@ -76,8 +76,15 @@ function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Blob URLs expire, so we null them out to prevent broken images
-        return { ...defaultData, ...parsed, groupImage: null, backImage: null, selectedIdols: parsed.selectedIdols.map(i => ({...i, image: null})) };
+        // Safety check for selectedIdols to prevent crash
+        const safeSelectedIdols = Array.isArray(parsed.selectedIdols) ? parsed.selectedIdols : [];
+        return { 
+          ...defaultData, 
+          ...parsed, 
+          groupImage: null, 
+          backImage: null, 
+          selectedIdols: safeSelectedIdols.map(i => ({...i, image: null})) 
+        };
       } catch (e) { return defaultData; }
     }
     return defaultData;
