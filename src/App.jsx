@@ -15,13 +15,11 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  useSortable
+  verticalListSortingStrategy
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { IDOLS } from './constants/idols';
 import { BRANDS, BRAND_LIST, getUnitsByBrand } from './constants/brands';
-import './styles/tokens.css';
+import { SortableIdolTag } from './components/SortableIdolTag';
 
 const TEMPLATES = [
   { id: 'standard', name: 'Standard', description: '王道のシンプルデザイン' },
@@ -35,29 +33,6 @@ const BACK_TEMPLATES = [
   { id: 'minimal', name: 'Minimal', description: 'ロゴ中心のシンプル構成' },
   { id: 'custom', name: 'Custom Image', description: '自作画像を背景に使用' },
 ];
-
-// --- Components ---
-
-function SortableIdolTag({ idol, onRemove, onImageUpload }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: idol.id });
-  const style = { transform: CSS.Transform.toString(transform), transition };
-  const fileInputRef = useRef(null);
-
-  return (
-    <div ref={setNodeRef} style={style} className="idol-tag animate-in">
-      <div className="drag-handle" {...attributes} {...listeners}>⣿</div>
-      <div className="color-dot" style={{ backgroundColor: idol.hex }}></div>
-      <span className="tag-name">{idol.name}</span>
-      <div className="tag-actions">
-        <button className="tag-icon-btn" onClick={() => fileInputRef.current?.click()} title="画像をアップロード">📷</button>
-        <button className="tag-icon-btn remove" onClick={onRemove}>✕</button>
-      </div>
-      <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={(e) => onImageUpload(idol.id, e)} />
-    </div>
-  );
-}
-
-// --- Main App ---
 
 export default function App() {
   const [cardData, setCardData] = useState(() => {
@@ -90,7 +65,7 @@ export default function App() {
           backImage: null, 
           selectedIdols: (parsed.selectedIdols || []).map(i => ({...i, image: null})) 
         };
-      } catch (e) { return defaultData; }
+      } catch { return defaultData; }
     }
     return defaultData;
   });
@@ -106,7 +81,6 @@ export default function App() {
   const [activeSearchBrands, setActiveSearchBrands] = useState(['allstars']);
   const [activeUnit, setActiveUnit] = useState(null);
   
-  const fileInputRef = useRef(null);
   const groupImageRef = useRef(null);
   const backImageRef = useRef(null);
   const cardRefFront = useRef(null);
@@ -118,12 +92,6 @@ export default function App() {
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-
-  useEffect(() => {
-    if (cardData.snsId.startsWith('@') && !cardData.qrUrl) {
-      setCardData(prev => ({ ...prev, qrUrl: `https://x.com/${prev.snsId.substring(1)}` }));
-    }
-  }, [cardData.snsId]);
 
   const selectedBrand = BRANDS[cardData.brandId] || BRANDS.allstars;
   
@@ -367,7 +335,16 @@ export default function App() {
                   </div>
                   <div className="form-group">
                     <label>SNS ID</label>
-                    <input type="text" className="form-input" value={cardData.snsId} onChange={(e) => setCardData(p => ({...p, snsId: e.target.value}))} />
+                    <input type="text" className="form-input" value={cardData.snsId} onChange={(e) => {
+                      const val = e.target.value;
+                      setCardData(p => {
+                        const next = { ...p, snsId: val };
+                        if (val.startsWith('@') && (!p.qrUrl || p.qrUrl.includes('x.com'))) {
+                          next.qrUrl = `https://x.com/${val.substring(1)}`;
+                        }
+                        return next;
+                      });
+                    }} />
                   </div>
                   <div className="checkbox-group">
                     <input type="checkbox" id="showTanto" checked={cardData.showTanto} onChange={(e) => setCardData(p => ({...p, showTanto: e.target.checked}))} />
@@ -514,147 +491,6 @@ export default function App() {
           </div>
         </section>
       </main>
-
-      <style>{`
-        .app-container { min-height: 100vh; background-color: #f7f8fc; color: #1a202c; padding-bottom: 5rem; }
-        .glass-panel { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
-        .animate-in { animation: fadeIn 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* HEADER */
-        .app-header { height: 180px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 2rem; background: #fff; border-bottom: 1px solid #e2e8f0; }
-        .header-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); opacity: 0.5; }
-        .header-content { position: relative; z-index: 10; text-align: center; }
-        .allstars-text { font-size: 3rem; font-weight: 900; background: linear-gradient(45deg, #1a365d, #2681c8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
-        .subtitle { color: #718096; letter-spacing: 0.3em; font-size: 0.8rem; margin-top: 0.5rem; font-weight: 700; }
-
-        .main-content { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 420px 1fr; gap: 2.5rem; padding: 0 1.5rem; }
-        .editor-section { padding: 2rem; height: calc(100vh - 250px); display: flex; flex-direction: column; }
-        .editor-scroll { overflow-y: auto; flex: 1; padding-right: 0.5rem; }
-        .editor-scroll::-webkit-scrollbar { width: 4px; }
-        .editor-scroll::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
-
-        .section-group h3 { font-size: 0.95rem; margin: 0 0 1rem 0; color: #2d3748; font-weight: 800; border-left: 4px solid #2681c8; padding-left: 0.8rem; }
-        .divider { border: 0; height: 1px; background: #edf2f7; margin: 2rem 0; }
-
-        .side-toggle { display: flex; gap: 0.5rem; background: #edf2f7; padding: 0.4rem; border-radius: 16px; margin-bottom: 1.5rem; }
-        .toggle-btn { flex: 1; padding: 0.9rem; border: none; border-radius: 12px; background: transparent; color: #718096; cursor: pointer; font-weight: 800; transition: 0.3s; font-size: 0.85rem; }
-        .toggle-btn.active { background: #fff; color: #2681c8; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-
-        .template-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
-        .template-btn { padding: 1rem; border-radius: 14px; border: 1px solid #e2e8f0; background: #fff; color: #2d3748; cursor: pointer; text-align: left; transition: 0.2s; font-size: 0.85rem; font-weight: 700; }
-        .template-btn:hover { border-color: #cbd5e0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .template-btn.active { border-color: #2681c8; background: #ebf4ff; color: #1a365d; }
-        .template-btn small { display: block; font-size: 0.65rem; color: #a0aec0; margin-top: 2px; font-weight: 500; }
-
-        .form-input { width: 100%; padding: 1rem 1.2rem; border-radius: 14px; border: 1px solid #e2e8f0; background: #fcfcfd; color: #1a202c; margin-top: 0.5rem; outline: none; box-sizing: border-box; font-size: 0.9rem; font-family: inherit; transition: 0.2s; }
-        .form-input:focus { border-color: #2681c8; box-shadow: 0 0 0 4px rgba(38,129,200,0.08); background: #fff; }
-        select.form-input { appearance: auto; cursor: pointer; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .form-group { margin-bottom: 1.2rem; }
-        .form-group label { display: block; font-size: 0.8rem; font-weight: 800; color: #4a5568; margin-bottom: 0; }
-
-        .checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 1rem; cursor: pointer; }
-        .checkbox-group input { width: 20px; height: 20px; cursor: pointer; accent-color: #2681c8; }
-        .checkbox-group span { font-size: 0.85rem; font-weight: 700; color: #4a5568; }
-
-        /* PREVIEW AREA */
-        .preview-sticky { position: sticky; top: 2rem; }
-        .preview-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-        .preview-header h2 { font-size: 1.2rem; margin: 0; font-weight: 900; color: #2d3748; }
-        .export-controls { display: flex; gap: 0.8rem; }
-        .download-btn { padding: 0.9rem 1.8rem; border-radius: 30px; border: none; font-weight: 800; cursor: pointer; font-size: 0.8rem; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .download-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
-        .download-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-        .card-outer-container { perspective: 1200px; margin-top: 1rem; }
-        .card-mockup { 
-          width: 100%; aspect-ratio: 91/55; background: #fff; color: #1a202c; 
-          position: relative; overflow: hidden; 
-          box-shadow: 0 20px 60px rgba(0,0,0,0.1); border-radius: 8px; 
-          transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s;
-          transform-style: preserve-3d;
-        }
-        .card-mockup:hover { 
-          transform: rotateY(10deg) rotateX(5deg) scale(1.02); 
-          box-shadow: -20px 40px 80px rgba(0,0,0,0.12); 
-        }
-        .card-inner { height: 100%; width: 100%; position: relative; }
-        .card-content { height: 100%; padding: 2.2rem 2.8rem; display: flex; flex-direction: column; justify-content: space-between; position: relative; z-index: 50; box-sizing: border-box; }
-        
-        .p-name { font-size: 2.4rem; font-weight: 900; line-height: 1; color: #1a202c; letter-spacing: -0.02em; }
-        .p-suffix { font-size: 1.2rem; font-weight: 800; margin-left: 0.2rem; color: #1a202c; }
-        .brand-label { font-size: 0.8rem; font-weight: 900; color: var(--brand-color); letter-spacing: 0.15em; }
-        .idol-area { font-size: 0.85rem; color: #4a5568; margin-top: 0.6rem; font-weight: 700; }
-        .sns-label { font-size: 0.8rem; color: #718096; font-weight: 600; }
-
-        .font-gothic { font-family: 'Noto Sans JP', sans-serif !important; }
-        .font-mincho { font-family: 'Noto Serif JP', serif !important; }
-        
-        .template-standard .deco-stripe { position: absolute; top: 0; left: 0; right: 0; height: 14px; background: var(--theme-gradient); }
-        .template-dynamic .deco-lines { position: absolute; top: -50%; right: -10%; width: 60%; height: 200%; background: var(--theme-gradient); opacity: 0.12; transform: rotate(15deg); }
-        .template-modern { background: #0f1115; }
-        .template-modern .p-name, .template-modern .p-suffix { color: #fff; }
-        .template-modern .idol-area { color: rgba(255,255,255,0.6); }
-        .template-modern .sns-label { color: rgba(255,255,255,0.4); }
-        .template-modern .deco-glow { position: absolute; inset: 0; background: radial-gradient(circle at 80% 20%, var(--brand-color), transparent 70%); opacity: 0.3; filter: blur(40px); }
-        .template-ticket .card-content { padding-left: 30%; }
-        .template-ticket .ticket-stub { position: absolute; left: 0; top: 0; bottom: 0; width: 22%; background: var(--brand-color); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; }
-        .stub-brand { font-size: 0.65rem; font-weight: 900; writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 3px; }
-        .deco-perforation { position: absolute; left: 22%; top: 0; bottom: 0; width: 4px; border-left: 2px dashed rgba(0,0,0,0.1); z-index: 25; }
-
-        .image-mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
-        .mode-btn { padding: 1.2rem; border-radius: 14px; border: 1px solid #e2e8f0; background: #fff; color: #4a5568; cursor: pointer; text-align: center; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .mode-btn:hover { border-color: #cbd5e0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .mode-btn.active { border-color: #2681c8; background: #ebf4ff; color: #1a365d; box-shadow: 0 4px 15px rgba(38,129,200,0.1); }
-        .mode-icon { font-size: 1.5rem; }
-        .mode-label { font-weight: 800; font-size: 0.9rem; }
-        .mode-btn small { font-size: 0.65rem; color: #718096; font-weight: 500; }
-        .mode-btn.active small { color: #2b6cb0; }
-
-        .idol-images-layer { position: absolute; inset: 0; left: 35%; z-index: 10; pointer-events: none; }
-        .idol-image-auto { position: absolute; height: 110%; bottom: -5%; object-fit: contain; right: calc(var(--index) * 12% - 5%); filter: drop-shadow(-10px 10px 20px rgba(0,0,0,0.3)); }
-        .group-image-layer { position: absolute; inset: 0; z-index: 10; pointer-events: none; display: flex; align-items: center; justify-content: flex-end; }
-        .group-image { height: 100%; max-width: 70%; object-fit: contain; object-position: right center; filter: drop-shadow(-10px 10px 25px rgba(0,0,0,0.3)); }
-
-        .card-mockup.back { background: var(--brand-color); color: #fff; }
-        .back-content { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem; box-sizing: border-box; position: relative; z-index: 5; }
-        .brand-logo-large { font-size: 2.5rem; font-weight: 900; letter-spacing: 0.05em; text-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .back-msg { margin-top: 1.2rem; font-size: 0.95rem; font-weight: 600; opacity: 0.9; max-width: 85%; text-align: center; line-height: 1.6; }
-        .no-bg { background: #fff !important; color: #1a202c !important; border: 1px solid #e2e8f0; }
-        .no-bg .brand-logo-large { color: var(--brand-color); }
-        .no-bg .back-msg { color: #4a5568; }
-        .no-bg .qr-container { background: #f7fafc; border-color: #e2e8f0; }
-        .no-bg .qr-container small { color: #718096; }
-        .no-bg .back-footer { color: #a0aec0; }
-
-        .qr-container { position: absolute; bottom: 1.5rem; right: 1.5rem; padding: 0.8rem; border-radius: 16px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .qr-container small { font-size: 0.55rem; font-weight: 900; letter-spacing: 0.1em; opacity: 0.8; }
-        .back-footer { position: absolute; bottom: 0.8rem; width: 100%; text-align: center; font-size: 0.5rem; opacity: 0.4; font-weight: 700; }
-
-        .idol-picker-dropdown { position: absolute; top: 100%; left: 0; right: 0; z-index: 200; margin-top: 8px; padding: 1.5rem; max-height: 450px; overflow-y: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; box-shadow: 0 25px 70px rgba(0,0,0,0.15); }
-        .unit-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.2rem; }
-        .unit-tab-btn { padding: 0.45rem 1rem; border-radius: 20px; border: 1px solid #e2e8f0; background: #f7fafc; color: #718096; cursor: pointer; font-size: 0.7rem; font-weight: 800; transition: 0.2s; }
-        .unit-tab-btn.active { background: var(--unit-color, #2681c8); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .idol-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .idol-item { padding: 0.7rem 1rem; border-radius: 12px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 700; color: #2d3748; border: 1px solid transparent; }
-        .idol-item:hover { background: #f7fafc; border-color: #edf2f7; transform: translateX(2px); }
-        .color-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(0,0,0,0.05); }
-
-        .idol-tag { background: #fff; padding: 0.8rem 1rem; border-radius: 16px; display: flex; align-items: center; gap: 1rem; border: 1px solid #e2e8f0; margin-bottom: 0.8rem; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-        .tag-name { flex: 1; font-weight: 800; font-size: 0.95rem; color: #1a202c; }
-        .tag-icon-btn { background: #f7fafc; border: 1px solid #edf2f7; width: 32px; height: 32px; border-radius: 10px; color: #4a5568; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: 0.2s; }
-        .tag-icon-btn:hover { background: #2681c8; color: #fff; border-color: #2681c8; }
-        .tag-icon-btn.remove:hover { background: #e53e3e; color: #fff; border-color: #e53e3e; }
-        
-        .instruction-text { margin-top: 1.5rem; font-size: 0.7rem; color: #a0aec0; text-align: center; line-height: 1.6; font-weight: 600; }
-        
-        @media (max-width: 1000px) {
-          .main-content { grid-template-columns: 1fr; }
-          .editor-section { height: auto; margin-bottom: 2rem; }
-          .preview-sticky { position: static; }
-        }
-      `}</style>
     </div>
   );
 }

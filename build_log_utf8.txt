@@ -1,0 +1,8 @@
+﻿
+> imas-p-card-designer@0.0.0 build
+> vite build
+
+[36mvite v8.0.11 [32mbuilding client environment for production...[36m[39m
+[2K
+transforming...笨・234 modules transformed.
+rendering chunks...
