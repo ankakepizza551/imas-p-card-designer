@@ -406,6 +406,9 @@ export default function App() {
                     )}
                   </div>
 
+                  {cardData.selectedIdols.length > 1 && cardData.imageMode === 'individual' && (
+                    <p className="layer-hint">↕ ドラッグで並び順 = レイヤー前後（上が前面）</p>
+                  )}
                   <div className="selected-idols-tags">
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                       <SortableContext items={cardData.selectedIdols.map(i => i.id)} strategy={verticalListSortingStrategy}>
@@ -470,13 +473,13 @@ export default function App() {
                       <div className="form-grid">
                         <div className="form-group">
                           <label>横位置: {cardData.imageOffsetX > 0 ? '+' : ''}{cardData.imageOffsetX}%</label>
-                          <input type="range" min="-50" max="50" value={cardData.imageOffsetX}
+                          <input type="range" min="-150" max="150" value={cardData.imageOffsetX}
                             onChange={e => setCardData(p => ({...p, imageOffsetX: Number(e.target.value)}))}
                             className="range-input" />
                         </div>
                         <div className="form-group">
                           <label>縦位置: {cardData.imageOffsetY > 0 ? '+' : ''}{cardData.imageOffsetY}%</label>
-                          <input type="range" min="-30" max="30" value={cardData.imageOffsetY}
+                          <input type="range" min="-80" max="80" value={cardData.imageOffsetY}
                             onChange={e => setCardData(p => ({...p, imageOffsetY: Number(e.target.value)}))}
                             className="range-input" />
                         </div>
@@ -668,14 +671,19 @@ export default function App() {
                 <div className="card-inner">
                   {cardData.imageMode === 'individual' ? (
                     <div className="idol-images-layer">
-                      {cardData.selectedIdols.map((idol, idx) => idol.image && (
-                        <img key={idol.id} src={idol.image} className="idol-image-auto" style={{
-                          '--index': idx,
-                          '--img-scale': idol.imgScale ?? 1,
-                          '--img-x': `${idol.imgOffsetX ?? 0}%`,
-                          '--img-y': `${idol.imgOffsetY ?? 0}%`,
-                        }} />
-                      ))}
+                      {(() => {
+                        const visible = cardData.selectedIdols.filter(i => i.image);
+                        const total = visible.length;
+                        return visible.map((idol, di) => (
+                          <img key={idol.id} src={idol.image} className="idol-image-auto" style={{
+                            '--index': di,
+                            '--total': total,
+                            '--img-scale': idol.imgScale ?? 1,
+                            '--img-x': `${idol.imgOffsetX ?? 0}%`,
+                            '--img-y': `${idol.imgOffsetY ?? 0}%`,
+                          }} />
+                        ));
+                      })()}
                     </div>
                   ) : (
                     cardData.groupImage && (

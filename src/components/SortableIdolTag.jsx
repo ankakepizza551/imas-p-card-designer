@@ -45,7 +45,7 @@ export function SortableIdolTag({ idol, onRemove, onImageUpload, onImageAdjust }
           <div className="adjust-row">
             <label>横 {offX > 0 ? '+' : ''}{offX}%</label>
             <input
-              type="range" min="-50" max="50"
+              type="range" min="-150" max="150"
               value={offX}
               onChange={e => onImageAdjust(idol.id, { imgOffsetX: Number(e.target.value) })}
               className="range-input"
@@ -54,7 +54,7 @@ export function SortableIdolTag({ idol, onRemove, onImageUpload, onImageAdjust }
           <div className="adjust-row">
             <label>縦 {offY > 0 ? '+' : ''}{offY}%</label>
             <input
-              type="range" min="-30" max="30"
+              type="range" min="-80" max="80"
               value={offY}
               onChange={e => onImageAdjust(idol.id, { imgOffsetY: Number(e.target.value) })}
               className="range-input"

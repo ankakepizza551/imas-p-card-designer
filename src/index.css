@@ -125,13 +125,16 @@ select.form-input { appearance: auto; cursor: pointer; }
 .idol-images-layer { position: absolute; inset: 0; left: 35%; z-index: 10; pointer-events: none; }
 .idol-image-auto {
   position: absolute; height: 110%; bottom: -5%; object-fit: contain;
-  right: calc(var(--index) * 12% - 5%);
+  /* 中央基準: 枚数(--total)に応じて等間隔に展開、上(index小)が前面 */
+  right: calc(50% - (var(--index) - (var(--total, 1) - 1) / 2) * 22%);
+  z-index: calc(var(--total, 5) - var(--index));
   filter: drop-shadow(-10px 10px 20px rgba(0,0,0,0.3));
   transform: scale(var(--img-scale, 1)) translate(var(--img-x, 0%), var(--img-y, 0%));
-  transform-origin: bottom right;
+  transform-origin: bottom center;
   animation: idolFadeIn 0.4s ease forwards;
 }
 @keyframes idolFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.layer-hint { font-size: 0.68rem; color: #a0aec0; font-weight: 600; margin: 0.3rem 0 0.5rem; }
 .group-image-layer { position: absolute; inset: 0; z-index: 10; pointer-events: none; display: flex; align-items: center; justify-content: flex-end; }
 .group-image { height: 100%; max-width: 70%; object-fit: contain; object-position: right center; filter: drop-shadow(-10px 10px 25px rgba(0,0,0,0.3)); }
 
