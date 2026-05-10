@@ -132,6 +132,19 @@ select.form-input { appearance: auto; cursor: pointer; }
 
 .instruction-text { margin-top: 1.5rem; font-size: 0.7rem; color: #a0aec0; text-align: center; line-height: 1.6; font-weight: 600; }
 
+/* TEXT POSITION CONTROLS */
+.text-pos-grid { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+.pos-btn { flex: 1; padding: 0.7rem 0.5rem; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; color: #4a5568; cursor: pointer; font-weight: 800; font-size: 0.8rem; transition: 0.2s; }
+.pos-btn:hover { border-color: #cbd5e0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.pos-btn.active { border-color: #2681c8; background: #ebf4ff; color: #1a365d; }
+
+/* CARD TEXT ALIGNMENT */
+.card-content.text-v-top { justify-content: flex-start; }
+.card-content.text-v-center { justify-content: center; }
+.card-content.text-v-bottom { justify-content: flex-end; }
+.card-content.text-h-left { text-align: left; align-items: flex-start; }
+.card-content.text-h-right { text-align: right; align-items: flex-end; }
+
 @media (max-width: 1000px) {
   .main-content { grid-template-columns: 1fr; }
   .editor-section { height: auto; margin-bottom: 2rem; }

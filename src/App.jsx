@@ -54,6 +54,9 @@ export default function App() {
       fontMode: 'gothic',
       showTanto: true,
       showBackBg: true,
+      showBrand: true,
+      textVAlign: 'top',
+      textHAlign: 'left',
     };
     if (saved) {
       try {
@@ -406,6 +409,32 @@ export default function App() {
                     <input type="checkbox" id="showTanto" checked={cardData.showTanto} onChange={(e) => setCardData(p => ({...p, showTanto: e.target.checked}))} />
                     <label htmlFor="showTanto">アイドル名の後に「担当」をつける</label>
                   </div>
+                  <div className="checkbox-group">
+                    <input type="checkbox" id="showBrand" checked={cardData.showBrand} onChange={(e) => setCardData(p => ({...p, showBrand: e.target.checked}))} />
+                    <label htmlFor="showBrand">ブランド名を表示する</label>
+                  </div>
+                </div>
+
+                <hr className="divider" />
+
+                <div className="section-group">
+                  <h3>5. テキスト位置</h3>
+                  <div className="form-group">
+                    <label>縦方向</label>
+                    <div className="text-pos-grid">
+                      {[{id:'top',label:'上'},{id:'center',label:'中央'},{id:'bottom',label:'下'}].map(p => (
+                        <button key={p.id} className={`pos-btn ${cardData.textVAlign === p.id ? 'active' : ''}`} onClick={() => setCardData(d => ({...d, textVAlign: p.id}))}>{p.label}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>横方向</label>
+                    <div className="text-pos-grid">
+                      {[{id:'left',label:'左寄せ'},{id:'right',label:'右寄せ'}].map(p => (
+                        <button key={p.id} className={`pos-btn ${cardData.textHAlign === p.id ? 'active' : ''}`} onClick={() => setCardData(d => ({...d, textHAlign: p.id}))}>{p.label}</button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -489,8 +518,8 @@ export default function App() {
                       </div>
                     )
                   )}
-                  <div className="card-content">
-                    <div className="card-header"><span className="brand-label">{selectedBrand.name}</span></div>
+                  <div className={`card-content text-v-${cardData.textVAlign} text-h-${cardData.textHAlign}`}>
+                    {cardData.showBrand && <div className="card-header"><span className="brand-label">{selectedBrand.name}</span></div>}
                     <div className="card-body">
                       <div className="name-area"><span className="p-name">{cardData.name}</span><span className="p-suffix">P</span></div>
                       <div className="idol-area">
