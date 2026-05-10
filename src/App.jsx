@@ -166,33 +166,80 @@ export default function App() {
     if (isExporting) return;
     setIsExporting(true);
     try {
-      const options = { pixelRatio: 3, cacheBust: true, style: { transform: 'none' } };
-      const f = await toPng(cardRefFront.current, options);
-      const b = await toPng(cardRefBack.current, options);
-      const dl = (u, n) => { const a = document.createElement('a'); a.download = n; a.href = u; a.click(); };
+      const options = { 
+        pixelRatio: 3, 
+        cacheBust: true, 
+        style: { transform: 'none' },
+        fontEmbedCSS: '', // フォントエラーで止まるのを防ぐ
+      };
+      
+      const f = await toPng(cardRefFront.current, options).catch(e => {
+        console.error('Front export failed:', e);
+        throw new Error('表面の画像生成に失敗しました');
+      });
+      const b = await toPng(cardRefBack.current, options).catch(e => {
+        console.error('Back export failed:', e);
+        throw new Error('裏面の画像生成に失敗しました');
+      });
+
+      const dl = (u, n) => { 
+        const a = document.createElement('a'); 
+        a.download = n; 
+        a.href = u; 
+        document.body.appendChild(a);
+        a.click(); 
+        document.body.removeChild(a);
+      };
       dl(f, `p-card-front.png`); dl(b, `p-card-back.png`);
-    } catch (err) { console.error(err); } finally { setIsExporting(false); }
+    } catch (err) { 
+      alert(`保存に失敗しました: ${err.message}`);
+      console.error(err); 
+    } finally { 
+      setIsExporting(false); 
+    }
   };
 
   const handleExportPDF = async () => {
     if (isExporting) return;
     setIsExporting(true);
     try {
-      const options = { pixelRatio: 2, cacheBust: true, style: { transform: 'none' } };
-      const fImg = await toPng(cardRefFront.current, options);
-      const bImg = await toPng(cardRefBack.current, options);
+      const options = { 
+        pixelRatio: 2, 
+        cacheBust: true, 
+        style: { transform: 'none' },
+        fontEmbedCSS: '',
+      };
+      
+      const fImg = await toPng(cardRefFront.current, options).catch(e => {
+        console.error('Front PDF export failed:', e);
+        throw new Error('表面の画像生成に失敗しました');
+      });
+      const bImg = await toPng(cardRefBack.current, options).catch(e => {
+        console.error('Back PDF export failed:', e);
+        throw new Error('裏面の画像生成に失敗しました');
+      });
+
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const cardW = 91, cardH = 55, marginX = 14, marginY = 22;
+      
       [fImg, bImg].forEach((img, pageIdx) => {
         if (pageIdx > 0) pdf.addPage();
         for (let i = 0; i < 5; i++) {
           for (let j = 0; j < 2; j++) {
-            pdf.addImage(img, 'PNG', marginX + j * cardW, marginY + i * cardH, cardW, cardH);
+            // 画像が空文字や不正なデータでないか最低限チェック
+            if (img && img.startsWith('data:image/png;base64,')) {
+              pdf.addImage(img, 'PNG', marginX + j * cardW, marginY + i * cardH, cardW, cardH);
+            }
           }
         }
       });
       pdf.save(`p-card-print.pdf`);
-    } catch (err) { console.error(err); } finally { setIsExporting(false); }
+    } catch (err) { 
+      alert(`PDF生成に失敗しました: ${err.message}`);
+      console.error(err); 
+    } finally { 
+      setIsExporting(false); 
+    }
   };
 
   return (
