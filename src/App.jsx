@@ -18,7 +18,8 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { IDOLS } from './constants/idols';
-import { BRANDS, BRAND_LIST, getUnitsByBrand } from './constants/brands';
+import { BRANDS, BRAND_LIST } from './constants/brands';
+import { getUnitsByBrand } from './constants/units';
 import { SortableIdolTag } from './components/SortableIdolTag';
 
 const TEMPLATES = [
@@ -677,11 +678,11 @@ export default function App() {
                     </div>
                   ) : (
                     cardData.groupImage && (
-                      <div className="group-image-layer">
-                        <img src={cardData.groupImage} className="group-image animate-in" style={{
-                          transform: `scale(${cardData.imageScale}) translate(${cardData.imageOffsetX}%, ${cardData.imageOffsetY}%)`,
-                          transformOrigin: 'right center',
-                        }} />
+                      <div className="group-image-layer" style={{
+                        transform: `scale(${cardData.imageScale}) translate(${cardData.imageOffsetX}%, ${cardData.imageOffsetY}%)`,
+                        transformOrigin: 'right center',
+                      }}>
+                        <img src={cardData.groupImage} className="group-image animate-in" />
                       </div>
                     )
                   )}
